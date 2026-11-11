@@ -3,6 +3,9 @@
 # Modelo do Claude usado em todas as etapas.
 model: claude-haiku-5-5
 
+# Modelo só do comando `cv` (gerar currículos). Roda poucas vezes; vale um modelo melhor.
+cv_model: claude-sonnet-5-5
+
 # Seus currículos (PDF, DOCX, TXT ou MD). Um por área ("track") e idioma.
 # O setup lê todos para montar o perfil; em cada candidatura vai o da área/idioma da vaga.
 cvs:

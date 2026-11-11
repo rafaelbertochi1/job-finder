@@ -30,6 +30,9 @@ Uso o Job Finder na minha própria busca de emprego. No primeiro mês:
 
 - **Entende o candidato.** Lê os currículos (PDF/DOCX) e faz uma entrevista curta no terminal:
   pretensão, modalidade, cidades, CLT/PJ e o que a pessoa não aceita. O resultado é um `profile.json`.
+- **Escreve currículos novos.** A partir do perfil, gera um currículo por área e idioma (PT/EN),
+  em PDF e DOCX, num layout de uma coluna que os sistemas de recrutamento (ATS) leem bem. Usa só
+  fatos reais e ainda devolve dicas do que falta para o currículo ficar mais forte.
 - **Busca em várias fontes:**
   - Gupy, Remotar, InfoJobs, Catho, Vagas.com, Sólides, Recrutei, ProgramaThor
   - LinkedIn (busca pública)
@@ -100,6 +103,7 @@ Python 3.11 · SQLite · httpx · Playwright · pypdf / python-docx · Rich · A
 jobfinder/
 ├── cli.py            comandos (setup, search, import, list, report, apply, run)
 ├── profile.py        leitura do CV + entrevista -> profile.json
+├── cv.py             geração de currículos (Claude + HTML/Playwright para PDF + python-docx)
 ├── sources/          um módulo por site (gupy.py, catho.py, infojobs.py, github_issues.py, ...)
 ├── matcher.py        pré-filtro + análise com o Claude
 ├── llm.py            camada fina sobre API / Claude Code com JSON Schema
@@ -127,6 +131,7 @@ jobfinder/
 | Comando | O que faz |
 |---|---|
 | `python -m jobfinder setup` | Lê os currículos, faz a entrevista e cria `data/profile.json` (formato em `data/profile.example.json`) |
+| `python -m jobfinder cv` | Gera currículos novos em `data/cv/gerados/` (PDF + DOCX); `--use` passa a usá-los nas candidaturas |
 | `python -m jobfinder search --no-web` | Busca vagas novas, filtra e dá nota |
 | `python -m jobfinder import --file vagas.jsonl --score` | Importa vagas de um arquivo (uma vaga JSON por linha) e dá nota |
 | `python -m jobfinder report --open` | Abre o relatório em `output/relatorio.html` |
@@ -139,6 +144,7 @@ No Windows, `JobFinder.bat` abre um menu com essas opções.
 ### Configuração (`config.yaml`)
 
 - `model`: modelo do Claude. `claude-haiku-5-5` basta para dar nota e custa bem menos.
+- `cv_model`: modelo só do comando `cv`, que roda poucas vezes (padrão `claude-sonnet-5-5`).
 - `search.sources.*`: liga ou desliga cada fonte e define os termos de busca.
 - `matching.min_score_apply`: nota mínima para entrar na fila (padrão 70).
 - `apply.auto_submit_domains` / `assisted_only_domains`: onde o envio automático é permitido.
@@ -159,6 +165,7 @@ one against the candidate's profile with Claude, and helps with applications. In
 real use: ~7,300 jobs collected, ~2,700 scored by the LLM, ~180 applications.
 
 - **Profile:** built from resumes (PDF/DOCX) plus a short interview.
+- **Resumes:** writes new ATS-friendly resumes per track and language (PDF + DOCX) using only real facts.
 - **Sources:** Gupy, InfoJobs, Catho, Vagas.com, Sólides, Recrutei, ProgramaThor, public LinkedIn,
   community job repos on GitHub, Greenhouse/Lever boards and the web.
 - **Pre-filter:** a free local filter (seniority, work model, city, keywords) runs before any LLM call.

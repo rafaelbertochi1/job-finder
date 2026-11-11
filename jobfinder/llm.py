@@ -164,10 +164,10 @@ class LLM:
             # Prefixo estável (system) fica em cache entre chamadas -> mais barato.
             system=[{"type": "text", "text": system, "cache_control": {"type": "ephemeral"}}],
             output_config={"effort": effort, "format": {"type": "json_schema", "schema": schema}},
-            # Se o classificador de segurança recusar, a API refaz em outro modelo.
-            betas=[FALLBACK_BETA],
-            fallbacks="default",
         )
+        # Se o classificador de segurança recusar, a API refaz em outro modelo (não existe no Haiku).
+        if "haiku" not in self.model:
+            kwargs.update(betas=[FALLBACK_BETA], fallbacks="default")
         if tools:
             kwargs["tools"] = tools
 

@@ -130,6 +130,55 @@ def cmd_import(args, cfg):
         cmd_search(args, cfg)
 
 
+def cmd_cv(args, cfg):
+    from jobfinder import cv
+    from jobfinder.profile import read_cv
+
+    profile = load_profile()
+    llm = LLM(args.model or cfg.get("cv_model") or cfg["model"])
+    tracks_ = args.track or cv.default_tracks(cfg, profile)
+    langs = args.lang or cv.default_languages(profile)
+
+    # Currículos originais como fonte extra de fatos (um por área, de preferência em português).
+    by_track: dict[str, dict] = {}
+    for c in all_cvs(cfg):
+        if not c["path"].exists() or cv.OUT_DIR in c["path"].parents:
+            continue
+        current = by_track.get(c["track"])
+        if current is None or (current["language"] != "pt" and c["language"] == "pt"):
+            by_track[c["track"]] = c
+    originals = []
+    for track, c in by_track.items():
+        originals.append({"type": "text", "text": f"Currículo original (área '{track}'):"})
+        originals += read_cv(c["path"], pdf_as_document=llm.backend == "api")
+
+    cv.OUT_DIR.mkdir(parents=True, exist_ok=True)
+    base = cv._slug(profile.get("name", ""))
+    entries = []
+    for track in tracks_:
+        for lang in langs:
+            console.print(f"Escrevendo currículo [bold]{track}[/] ({lang}) ...")
+            content = cv.write_content(llm, profile, originals, track, lang)
+            stem = f"{base}_CV_{cv._slug(track)}_{lang.upper()}"
+            pdf, docx_path = cv.OUT_DIR / f"{stem}.pdf", cv.OUT_DIR / f"{stem}.docx"
+            cv.render_pdf(cv.render_html(profile, content, lang), pdf)
+            cv.render_docx(profile, content, lang, docx_path)
+            console.print(f"  [green]{pdf.relative_to(cv.ROOT)}[/] e .docx")
+            for tip in content["tips"]:
+                console.print(f"  [dim]dica: {tip}[/]")
+            entries.append({"path": pdf.relative_to(cv.ROOT).as_posix(), "track": track, "language": lang})
+
+    if args.use:
+        cv.use_in_config(entries)
+        console.print("\n[green]config.yaml atualizado:[/] as candidaturas passam a usar os currículos novos.")
+    else:
+        console.print("\nConfira os arquivos. Para usar nas candidaturas, rode de novo com --use "
+                      "ou troque o bloco 'cvs' do config.yaml por:")
+        console.print("cvs:\n" + "".join(
+            f"  - {{path: {e['path']}, track: {e['track']}, language: {e['language']}}}\n" for e in entries),
+            markup=False, soft_wrap=True)
+
+
 def cmd_run(args, cfg):
     cmd_search(args, cfg)
     if cfg["apply"]["mode"] != "off":
@@ -159,6 +208,13 @@ def main():
     src.add_argument("--file", help="arquivo com uma vaga JSON por linha")
     s.add_argument("--score", action="store_true", help="em seguida filtra e analisa as vagas novas")
     s.set_defaults(func=cmd_import)
+
+    s = sub.add_parser("cv", help="gera currículos novos (PDF + DOCX) a partir do perfil")
+    s.add_argument("--track", action="append", help="área (repita para várias; padrão: as áreas de 'cvs' no config)")
+    s.add_argument("--lang", action="append", choices=["pt", "en"], help="idioma (padrão: pt, e en se o perfil tiver inglês)")
+    s.add_argument("--model", help="modelo do Claude só para este comando (padrão: cv_model do config)")
+    s.add_argument("--use", action="store_true", help="passa a usar os currículos gerados nas candidaturas")
+    s.set_defaults(func=cmd_cv)
 
     s = sub.add_parser("list", help="lista as vagas já analisadas")
     s.add_argument("--min", type=int, help="nota mínima")
