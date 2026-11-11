@@ -1,0 +1,140 @@
+# Configuração do Job Finder. Edite à vontade.
+
+# Modelo do Claude usado em todas as etapas.
+model: claude-haiku-5-5
+
+# Seus currículos (PDF, DOCX, TXT ou MD). Um por área ("track") e idioma.
+# O setup lê todos para montar o perfil; em cada candidatura vai o da área/idioma da vaga.
+cvs:
+  - {path: data/cv/MeuNome_CV_Area1.pdf, track: area1, language: pt}
+
+search:
+  # Ignora vagas publicadas há mais de N dias (quando a fonte informa a data).
+  max_age_days: 21
+  # Modalidades aceitas. Remoto é priorizado no ranking; presencial/híbrido só
+  # passam se a cidade estiver em "accepted_cities" do seu perfil.
+  modalities: [remote, hybrid, onsite]
+  sources:
+    gupy:
+      enabled: true
+      max_per_query: 100
+      # Termos curtos funcionam melhor na Gupy (busca pelo título da vaga).
+      # Vazio = usa as buscas do perfil sem "júnior/remoto".
+      queries: [python, backend, back-end, dados, engenheiro de dados, data engineer, etl, java, sql, automação, rpa, integração, estágio]
+    remotar:
+      enabled: true
+      pages: 2
+    github:
+      enabled: true
+      # Repositórios da comunidade onde empresas publicam vagas como issues.
+      repos:
+        - backend-br/vagas
+        - frontendbr/vagas
+        - soujava/vagas-java
+        - CocoaHeadsBrasil/vagas
+        - dotnetdevbr/vagas
+        - react-brasil/vagas
+        - qa-brasil/vagas
+        - datascience-br/vagas
+        - phpdevbr/vagas
+    greenhouse:
+      enabled: false
+      # Slugs de empresas em boards.greenhouse.io/<slug>
+      boards: []
+    lever:
+      enabled: false
+      # Slugs de empresas em jobs.lever.co/<slug>
+      companies: []
+    linkedin:
+      # Busca pública do LinkedIn Vagas (sem login). Remoto busca no Brasil todo;
+      # híbrido/presencial só na região de "local_location".
+      enabled: true
+      queries: [python, desenvolvedor back-end, engenheiro de dados, analista de dados, java, sql, automação python, estágio tecnologia, estágio dados]
+      remote_location: Brazil
+      local_location: São Paulo, Brazil
+      pages: 3
+      # Máximo de descrições baixadas por rodada (cada uma é uma requisição).
+      max_details: 120
+      delay: 2.0
+    # Mais devagar: o Vagas.com bloqueia o IP (inclusive no navegador) quando recebe muitas requisições.
+    vagas_com:
+      enabled: true
+      # Viram o caminho /vagas-de-<termo> do site.
+      queries: [python, java, engenheiro de dados, analista de dados, desenvolvedor back end, sql]
+      max_details: 40
+      delay: 2.5
+    programathor:
+      enabled: true
+      # Listagens do site (programathor.com.br/<listagem>).
+      listings: [jobs-python, jobs-java, jobs-sql, jobs-postgresql]
+      pages: 3
+      max_details: 60
+      delay: 2.0
+    solides:
+      enabled: true
+      queries: [python, java, back-end, dados, sql, desenvolvedor, estágio]
+      pages: 5
+    catho:
+      enabled: true
+      # Só no estado abaixo: a Catho não informa modalidade nem filtra remoto pela URL.
+      state: sp
+      queries: [python, java, desenvolvedor back end, engenheiro de dados, analista de dados, sql, estagio tecnologia]
+      pages: 2
+      max_details: 80
+      delay: 2.0
+    infojobs:
+      enabled: true
+      # Remoto no Brasil todo; híbrido/presencial só neste estado.
+      state: sao-paulo
+      queries: [python, java, desenvolvedor back end, engenheiro de dados, analista de dados, sql, estagio ti]
+      max_details: 80
+      delay: 2.0
+    recrutei:
+      # Recrutei Empregos: vagas de todas as empresas que usam a Recrutei (Clicksoft etc.).
+      enabled: true
+      queries: [python, java, back end, backend, desenvolvedor, engenheiro de dados, analista de dados, sql]
+      pages: 2
+      max_details: 60
+      delay: 2.0
+    web:
+      # Busca na web com o Claude (posts de "estamos contratando", sites de
+      # empresas, LinkedIn público etc.). Mais caro que as outras fontes.
+      enabled: false
+      max_searches: 8
+
+matching:
+  # Nota mínima (0-100) para a vaga aparecer no relatório.
+  min_score_report: 50
+  # Nota mínima para a vaga entrar na fila de candidatura.
+  min_score_apply: 70
+  # Chamadas paralelas ao Claude na etapa de ranking.
+  workers: 8
+
+apply:
+  # off       -> só busca e ranking
+  # assisted  -> prepara tudo, abre o navegador/e-mail e você confirma cada envio
+  # auto      -> envia sozinho onde é permitido (abaixo); o resto cai no modo assistido
+  mode: assisted
+  max_per_run: 10
+  # Canais que podem ser enviados sem confirmação no modo auto.
+  auto_channels: [email, form]
+  # Formulários (ATS) onde o envio automático é permitido. Sites com captcha
+  # sempre param para você concluir.
+  auto_submit_domains:
+    - boards.greenhouse.io
+    - job-boards.greenhouse.io
+    - jobs.lever.co
+    - jobs.ashbyhq.com
+    - apply.workable.com
+  # Sites cujos termos proíbem automação: sempre modo assistido (você clica em enviar).
+  assisted_only_domains:
+    - gupy.io
+    - linkedin.com
+    - indeed.com
+    - catho.com.br
+    - infojobs.com.br
+    - vagas.com.br
+    - glassdoor.com
+    - glassdoor.com.br
+  # Navegador invisível no modo auto (true) ou visível (false).
+  headless_auto: false

@@ -1,0 +1,86 @@
+{
+  "name": "",
+  "email": "",
+  "phone": "",
+  "city": "",
+  "state": "",
+  "linkedin": "",
+  "github": "",
+  "portfolio": "",
+  "headline": "",
+  "summary": "",
+  "seniority": "",
+  "years_experience": 0,
+  "areas": [],
+  "target_titles": [],
+  "skills": [
+    {
+      "name": "",
+      "level": "",
+      "years": 0
+    }
+  ],
+  "languages": [
+    {
+      "language": "",
+      "level": ""
+    }
+  ],
+  "education": [],
+  "certifications": [],
+  "experiences": [
+    {
+      "company": "",
+      "role": "",
+      "start": "",
+      "end": "",
+      "highlights": []
+    }
+  ],
+  "preferences": {
+    "modalities": [],
+    "accepted_cities": [],
+    "relocate": false,
+    "contract_types": [],
+    "salary_min_brl": 0,
+    "salary_notes": "",
+    "availability": "",
+    "deal_breakers": [],
+    "interests": [],
+    "internship_companies": [],
+    "internship_stipend_min_brl": 0
+  },
+  "search_queries": [],
+  "keywords": [],
+  "form_answers": [
+    {
+      "question": "",
+      "answer": ""
+    }
+  ],
+  "quiz_answers": [
+    {
+      "question": "",
+      "answer": ""
+    }
+  ],
+  "diversity": {
+    "gender_identity": "",
+    "sexual_orientation": "",
+    "race": "",
+    "pcd": false,
+    "groups": [],
+    "note": ""
+  },
+  "extracurricular": [],
+  "birth_date": "",
+  "address": {
+    "street": "",
+    "number": "",
+    "neighborhood": "",
+    "city": "",
+    "state": "",
+    "postal_code": "",
+    "country": ""
+  }
+}

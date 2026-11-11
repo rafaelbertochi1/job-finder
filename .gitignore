@@ -1,0 +1,5 @@
+# Segredos (senhas SMTP, tokens) e sessões logadas do navegador nunca vão para o git.
+.env
+data/browser_profile/
+*.db-journal
+__pycache__/
